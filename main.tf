@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = "dop_v1_42a29b8908aa9dd7da0b88482b0c09df3c4def301f773076f7f02559e9db56f3"
+  token = "dop_v1_9609016eaff1e0cf40d20d952e0e59499bb2545d71da1cb43b4e8394e1b06edb"
 }
 
 data "digitalocean_ssh_key" "mykey" {
@@ -23,13 +23,10 @@ resource "digitalocean_droplet" "jenkins" {
   ssh_keys = [data.digitalocean_ssh_key.mykey.id]
 }
 
-
-
 resource "digitalocean_kubernetes_cluster" "k8s" {
-  name   = "k8s"
-  region = "nyc1"
-  # Grab the latest version slug from `doctl kubernetes options versions`
-  version = "2.25.2"
+  name    = "k8s"
+  region  = "nyc1"
+  version = "1.25.4-do.0"
 
   node_pool {
     name       = "default"
