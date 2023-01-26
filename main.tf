@@ -8,11 +8,11 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = ""
+  token = var.do_token
 }
 
-data "digitalocean_ssh_key" "mykey" {
-  name = "mykey"
+data "digitalocean_ssh_key" "ssh_key" {
+  name = var.do_ssh_key_name
 }
 
 resource "digitalocean_droplet" "jenkins" {
@@ -20,12 +20,12 @@ resource "digitalocean_droplet" "jenkins" {
   name     = "jenkinsVm"
   region   = "nyc1"
   size     = "s-2vcpu-2gb"
-  ssh_keys = [data.digitalocean_ssh_key.mykey.id]
+  ssh_keys = [data.digitalocean_ssh_key.ssh_key.id]
 }
 
 resource "digitalocean_kubernetes_cluster" "k8s" {
   name    = "k8s"
-  region  = "nyc1"
+  region  = var.region
   version = "1.25.4-do.0"
 
   node_pool {
@@ -34,4 +34,31 @@ resource "digitalocean_kubernetes_cluster" "k8s" {
     node_count = 2
 
   }
+}
+
+variable "region" {
+  type        = string
+  default     = ""
+  description = "Região padrão"
+}
+
+variable "do_token" {
+  type        = string
+  default     = ""
+  description = "token atual"
+}
+
+variable "do_ssh_key_name" {
+  type        = string
+  default     = ""
+  description = "minha chave cadastrada da DO"
+}
+
+output "jenkins_ip" {
+  value = digitalocean_droplet.jenkins.ipv4_address
+}
+
+resource "local_file" "name" {
+  content  = digitalocean_kubernetes_cluster.k8s.kube_config.0.raw_config
+  filename = "kubeconfig.yaml"
 }
